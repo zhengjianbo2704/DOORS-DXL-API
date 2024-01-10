@@ -1,0 +1,18 @@
+//C# 系统结合 
+ noError()  
+ 
+ 
+ 
+ 
+string errmsg=lastError()
+ 
+		 exportXML = "D:/1/INIT.XML"
+	  	Stream outfile = write(  exportXML) 
+				outfile <<  "<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n" "<root>\n"
+						  outfile << errmsg
+				 outfile <<  "</root>\n"
+		close outfile   
+		 errmsg=lastError()
+ 
+
+ 

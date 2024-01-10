@@ -1,0 +1,15 @@
+const string fontTable ="======" 
+
+string	modulePath="/水电费/中文_1"
+Module   m = read(modulePath,false)
+
+
+ Object obj
+
+    for obj in   m do{
+
+string s = richTextFragment( richTextWithOle obj.ALongText,
+		 fontTable, false) 
+	   print s"\n"
+
+}

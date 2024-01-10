@@ -1,0 +1,86 @@
+ //当前文件的权限判断 
+bool acceessFile(string user, AccessRec acl) {
+  string thisuser = (username acl) 
+  if(thisuser==null){	
+ 	 if (read acl) { 
+   			 print   thisuser " everyone can read  \n"
+   			 return  true 
+ 		 } 
+	}
+
+  if (thisuser != user) return false   
+  if (read acl) {
+    return  true 
+  } 
+  return false
+} 
+ //"#MODULE_PATH#" //
+string modulePath="/New Project/New Folder/New Module3" 
+Module m = read(modulePath,false) 
+ 
+//当前用户 传入一个数据 用于判断是否拥有这些权限
+string user = "USER_A"  
+AccessRec acl,facl
+bool found = false ,folderfound=false 
+for acl in m do {
+  if (acceessFile(user, acl)) {
+    found = true
+    break
+  }
+}
+  print "found: " found "\n"
+  
+//-----------------------文件夹权限-----------------------
+
+	 
+Folder f = read("/New Project/New Folder",false) 
+for facl in f do {
+  if (acceessFile(user, facl)) {
+    folderfound = true
+    break
+  }
+}
+ print "folderfound: " folderfound "\n"
+ 
+ //--------层级查找是否有权限------
+	Folder f = folder("/New Project/New Folder/X233") 
+ 	string itemName = fullName(f)
+    Item   thisItem = item(itemName) 
+    string errmsg = ""
+    bool   inher  = false
+    errmsg = isAccessInherited(thisItem, inher)
+ 	print   itemName errmsg 
+	print   inher  
+    while ( errmsg == "" && inher && !null thisItem )
+    {   
+		itemName = path(thisItem)
+        thisItem = item(itemName) 
+        errmsg = isAccessInherited(thisItem, inher)  
+		if(! inher){
+			//这个目录的权限 
+		} 
+    }
+	 
+Folder pFolder = folder(itemName) 
+for facl in pFolder do {
+  if (acceessFile(user, facl)) {
+    folderfound = true
+    break
+  }
+}
+ print "folderfound: " folderfound "\n"
+-------------是否有属性字段-----------
+string modulePath="/New Project/New Folder/New Module3" 
+
+
+
+Module m = read (modulePath, false)
+AttrDef adRec
+adRec = find (m, "Object Textx")
+if(adRec==null){
+ 
+
+}else{
+	print adRec.typeName " attribute: " adRec.name "\n"
+}
+ 

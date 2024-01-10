@@ -1,0 +1,244 @@
+   noError() 
+ 
+ bool acceessFile(string user, AccessRec acl) {
+ 
+  string thisuser = (username acl)  
+  if(thisuser==null){  
+		if(user==null){
+			if (read acl) { 
+                return  true 
+			} 
+		}
+		if(user==""){
+			if (read acl) { 
+                return  true 
+			} 
+		}
+    }
+  if (thisuser != user) return false   
+  if (read acl) {
+    return  true 
+  } 
+  return false
+} 
+bool accessFileFirst(string user,string itemName){
+if(user==""){
+			return true
+		}
+	AccessRec facl 
+	bool folderfound=false
+	Folder pFolder = folder(itemName) 
+	for facl in pFolder do {
+	  if (acceessFile(user, facl)) {
+		folderfound = true
+		break
+	  }
+	} 
+	return folderfound
+}
+
+bool accessFileModuleFirst(string user,string itemName){
+	 
+		if(user==""){
+					return true
+		}
+		 
+			AccessRec facl 
+			bool folderfound=false
+			Item pFolder = item(itemName) 
+		 	for facl in pFolder do {
+		 	  if (acceessFile(user, facl)) {
+		 		folderfound = true
+		 		break
+		 	  }
+		 	}  
+			return folderfound
+}
+
+ 
+bool access(string user,string module){ 
+ if(user==""){
+			return true
+		}
+AccessRec macl  
+ Module mod=read(module,false)
+ 
+bool folderfound=false 
+for macl in mod do {
+  if (acceessFile(user, macl)) {
+    folderfound = true
+    break
+  }
+}
+if(folderfound){
+}else{
+	   string pathName = path(mod)  
+	   Folder f = folder(pathName) 
+		 string itemName = fullName(f)
+		Item   thisItem = item(itemName) 
+		string errmsg = ""
+		bool   inher  = false
+		errmsg = isAccessInherited(thisItem, inher)
+		 
+		while ( errmsg == "" && inher && !null thisItem )
+		{   
+			itemName = path(thisItem)
+			thisItem = item(itemName) 
+			folderfound=accessFileFirst(user,itemName)
+			if(folderfound){
+				return folderfound
+			}
+			errmsg = isAccessInherited(thisItem, inher)  
+			
+		}
+	folderfound=accessFileFirst(user,itemName) 
+	 }
+	  return folderfound
+ }
+ 
+ 
+bool accessFolder(string user,string pathName){  
+		if(user==""){
+			return true
+		}
+		bool folderfound=false 
+	   Folder f = folder(pathName) 
+		 string itemName = fullName(f)
+		Item   thisItem = item(itemName) 
+		string errmsg = ""
+		bool   inher  = false
+		errmsg = isAccessInherited(thisItem, inher)
+		 
+		while ( errmsg == "" && inher && !null thisItem )
+		{   
+			itemName = path(thisItem)
+			thisItem = item(itemName) 
+			
+			folderfound=accessFileFirst(user,itemName)
+			if(folderfound){
+				return folderfound
+			}
+			
+			errmsg = isAccessInherited(thisItem, inher)  
+			
+		}
+	folderfound=accessFileFirst(user,itemName)
+			if(folderfound){ 
+				return folderfound
+			}
+ 
+
+	  return folderfound
+ }
+ 
+ 
+bool accessModule(string user,string pathName){   
+		if(user==""){
+			return true
+		}  
+		bool folderfound=false  
+		Item   thisItem = item(pathName) 
+		string errmsg = ""
+		bool   inher  = false
+		errmsg = isAccessInherited(thisItem, inher)
+		 string itemName=pathName 
+	 	while ( errmsg == "" && inher && !null thisItem )
+	 	{    
+	 		itemName = path(thisItem)  
+	 	 	folderfound=accessFileModuleFirst(user,itemName)
+	 	 	if(folderfound){
+	 	 		return folderfound
+	 	 	}  
+	 		 thisItem = item(itemName)  
+	 	 	 errmsg = isAccessInherited(thisItem, inher)   
+	 	}  
+	folderfound=accessFileModuleFirst(user,itemName)
+	if(folderfound){  
+		return folderfound
+	} 
+	  return folderfound
+ }
+ 
+  
+string scanFromFirstFolder(Folder f,string users[])
+{
+    Item itm
+	string str=""
+    for itm in f do
+    {
+        if (null itm) continue
+        if (isDeleted(itm)) continue
+        if ((type (itm) == "Project") || (type (itm) == "Folder"))
+        {     
+			bool isAcc=false
+			 for i in 0 : (sizeof(users) -1) do 
+			  {  
+			 	 if(accessFolder(users[i],fullName(itm))){
+			 		isAcc=true
+			 		  break
+			 	 }else{
+			 		 continue
+			 	 }
+			  } 
+			if(isAcc){ 	
+			}else{
+			 	continue
+			} 
+            string s = name(folder(itm))
+ 
+			  string PathName = fullName(itm) 
+			  	string desc=description(itm)
+
+            str = str "<folder name=\""s "\"  type=\""type(itm)"\" path=\""PathName "\" desc=\""desc "\" >\n" 
+            str = str "</folder>\n"
+        }
+        else if(type (itm) == "Formal") 
+        {  
+			bool isAcc=false
+			for i in 0 : (sizeof(users) -1) do 
+			 {  
+				 if(accessModule(users[i],fullName(itm))){
+					isAcc=true
+					 continue
+				 }else{
+					continue
+				 }
+			 } 
+			if(isAcc){ 
+			}else{ 
+				continue
+			}
+            string s = name(itm)
+			s
+			string PathName = fullName(itm)
+			  	string desc=description(itm)
+            str = str "<module name=\""s "\"  type=\"FomalModule\" path=\""PathName "\" desc=\""desc "\" /> " 
+        }
+    }
+	return str
+}
+
+string itm="#EXPORT_FOLDER#"
+ 
+string str=""
+str = str "<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n" "<root>\n"
+ 
+ string users[]={#USERS#}
+string listfolder=scanFromFirstFolder(folder(itm),users)
+str=str listfolder
+  
+str=str "</root>" 
+
+
+string errmsg=lastError()
+if(errmsg!=null){  
+}else{ 
+		exportDir = "#EXPORT_DIR#" 
+		exportXML = "#EXPORT_XML#"
+ 
+		Stream outfile = write(exportDir exportXML ) 
+						  outfile <<   str
+		close outfile    
+		errmsg=lastError()
+}
+ 

@@ -1,0 +1,53 @@
+ noError() 
+string str = ""
+  
+void scanFromFirstFolder(Folder f)
+{ 
+ str = str "<table border=1>\n" 
+    Item itm 
+    for itm in f do
+    { 
+        if (null itm) continue
+        if (isDeleted(itm)) continue 
+        if ((type (itm) == "Project") || (type (itm) == "Folder"))
+        {    string s = name(folder(itm)) 
+            //str = str "<folder name=\""s "\"  type=\""type(itm)"\">\n" 
+           // str = str "</folder>\n" 
+			str = str "<tr>\n" 
+			str = str "<td>"s "</td><td>"type(itm)"</td>\n" 
+            str = str "</tr>\n" 
+        }
+        else
+        {
+           // string s = name(itm) 
+           // str = str "<module name=\""s "\"  type=\"FomalModule\"> "
+           // string PathName = fullName(itm) 
+           // str = str PathName "</module>\n"  
+		   
+			 string s = name(itm) 
+			str = str "<tr>\n" 
+			str = str "<td>" s "</td><td>FomalModule</td>\n" 
+            str = str "</tr>\n" 
+			
+        } 
+    }
+	str = str "</table>\n" 
+} 
+scanFromFirstFolder  folder("/")   
+string errmsg=lastError()
+if(errmsg!=null){ 
+	replyAPI "myReply  \""errmsg"\""
+}else{
+	
+exportDir = "#EXPORT_DIR#"
+ exportXML = "#EXPORT_XML#"
+		Stream outfile = write(exportDir exportXML) 
+						  outfile <<   str
+		close outfile  
+
+	replyAPI "myReply  \""exportDir exportXML"\""
+}
+
+ 
+
+ 

@@ -1,0 +1,344 @@
+//C# 系统结合
+
+ noError() 
+ int uniqueOleNumber = 0
+ string getBaseFilename(Object obj, string pictureType, string from, string ident)
+{ 
+    return  goodFileName(pictureType (uniqueID module fullName(module obj)) (uniqueOleNumber++) from "-" ident  "-"  )
+}  
+
+
+int index(string s, string t) {
+  int ls = length s
+  int lt = length t 
+  int i,j,k
+  for (i=0; i<(ls-lt+1) ; i++) {
+     j=i
+     for (k=0; k<lt && s[j]==t[k]; k++) {j++}
+     if (k==lt) return i
+  }
+  return -1
+}
+void replace(string& s, string t, string r) {
+  int len = length(t)
+  int i = index(s,t)
+  while(i>=0) {
+    if (i==0) s = r s[i+len:]
+    else s = s[0:i-1] r s[i+len:]
+    i = index(s,t)
+  }
+  return
+}
+
+string cuview="#MODULE_VIEW#"
+
+string str = ""
+string modulePath="#MODULE_PATH#"
+Buffer ob = create  
+Buffer tb = create  
+//为了防止出现数据不同步情况 read 后 用true   Module m = read(modulePath,true) 用于打开并同步文件，然后立即关闭 close m   这样就能确保数据都是同步更新的
+
+
+
+Module m 
+
+ if(cuview==""){
+	  m = read(modulePath,true) //先更新
+	 close(m) 
+	 m = read(modulePath,false)
+ }else{ 
+	m = read(modulePath,true)
+	View v = view (cuview)
+	load (m,v)
+ }
+
+
+ //判断下距离上次时间 ，超过一定时间才进行刷新  防止重复处理
+ 
+exportDir ="#EXPORT_DIR#"  
+	 
+    //获得Module中的所有一级Object
+	
+	Object cellTable(Object o) {
+
+			Object o2 = parent o
+			if (! null o2) 
+				return (parent o2)
+			else
+				return null
+		}
+
+const string AHeading           = "Object Heading"
+const string ellipsis           = "..."
+const string ACellWidth         = "TableCellWidth"
+const string AnID               = "Object Identifier"
+const string AMainColumnAttribute = "Main Column Attribute"
+
+bool   usePictures        = false
+
+  
+bool dumpBody(Object obj) { 
+
+    setempty tb 
+    bool isOutput = false   
+
+AttrDef adRec
+adRec = find (module obj, ALongText)
+if(adRec==null){ 
+}else{ 
+    
+		 string oleBaseFileName  = getBaseFilename(obj, "OLE", "Attribute", ALongText)
+						 setempty tb 
+						  htmlText(tb, obj.ALongText, true, false,  "", "",exportDir, oleBaseFileName) 
+		ob += tb 
+    }
+     
+    return false
+}
+
+
+void htmlInlineTable(Object t)  
+{
+	
+    Object r,c
+      int current_rowwidth =0 
+	  
+	 ob += "<TABLE><![CDATA["	 
+	  
+ ob += "<table border=1>\n"	  
+    for r in t do {
+        ncells = 0
+		
+         ob += "<tr>\n"
+        for c in r do {
+            if (!isVisible c) continue
+             if(true){
+                string wd = probeAttr_(c, ACellWidth)
+                if (null wd) wd = "50"  
+				 (((((((ob += "<td colSpan=") += wd) += " valign=") += "") += "top") += "") += ">")
+              //  ob += "<td >"
+            } else {
+                ob += "<td >"
+            }
+            
+            ((((((ob += "<a name=") += "") += "X") += (probeAttrBuff_(c, "Absolute Number") "")) += "") += "> \n")
+            
+            if(!canRead c)
+            {
+                continue
+            }
+            string attributeName = c.(reserved AMainColumnAttribute)
+            if(null attributeName)
+            { 
+				dumpBody(c);
+            }
+            else
+            { 
+            }  
+            string absNo = probeAttr_(c, "Absolute Number")
+              
+            ob += " </td>\n"
+            
+
+        }
+        ob += "</tr>\n"
+  
+         
+    } 
+    ob += "</table>\n"
+     ob += "]]></TABLE>"
+}
+	
+
+ viewNamex = currentView (m)	
+	 ob += "<CURRENTVIEW>" 
+	ob +=  viewNamex 
+  ob += "</CURRENTVIEW>"
+
+Column colx
+ ob += "<COLUMNS>"
+for colx in m do { 
+	ctitle=title(colx)
+	ismain=main(colx)
+	if(ctitle==""&&ismain){
+		ctitle=" "
+	}
+	ob +=  ctitle
+	ob+=","
+ }
+  ob += "</COLUMNS>"
+   
+ ob += "<COLUMNS_MAIN>"
+for colx in m do { 
+	ob =ob    main(colx) ""
+	ob+=","
+ }
+  ob += "</COLUMNS_MAIN>"
+
+ ob += "<VIEWS>"
+  string viewName
+	for viewName in views m do {
+			ob =ob viewName ""
+			ob+=","
+	}
+ob += "</VIEWS>"
+
+Object lastCellTable        = null
+bool   isFormal           = true
+   Object obj
+	 Column col 
+    for obj in   m do
+    { 		
+		if (isFormal && (cell obj)) {
+            Object t = cellTable(obj)
+            if (t == lastCellTable) continue
+        }  
+	 ob += "<ROW>"
+					if (! canRead obj) {
+						ob += "<Readlockeddata />" 
+						ob += "</ROW>" 
+						continue
+					} 
+
+					 obj_id= identifier(obj)
+					 ob+="<ROW_ID>"
+							ob+="<![CDATA["
+						 	ob+= obj_id
+							ob+="]]>"
+						 	ob+="</ROW_ID>"
+
+						 setempty tb
+						 AttrDef adRecx
+						 adRecx = find (m, AHeading)
+						 if(adRecx==null){ 
+							
+						 }else{ 
+						 	htmlText(tb, obj.AHeading, true, false, "", "") 
+						 	ob+="<AHEADING>"
+							ob+="<![CDATA["
+						 	ob+= stringOf(tb)
+							ob+="]]>"
+						 	ob+="</AHEADING>" 
+						 }	
+ 
+						
+						AttrDef adRec
+						adRec = find (m, ALongText) 
+						if(adRec==null){ 
+						}else{ 
+							 string oleBaseFileName  = getBaseFilename(obj, "OLE", "Attribute", ALongText)
+							 setempty tb 
+							  htmlText(tb, obj.ALongText, true, false,  "", "",exportDir, oleBaseFileName) 
+							 xhtml=stringOf(tb)  
+							ob+="<ALONGTEXT>" 
+							ob+="<![CDATA["
+							ob+= xhtml
+							ob+="]]>"
+							//ob+= oleBaseFileName
+							ob+="</ALONGTEXT>"  
+							
+							ob+="<RTF>" 
+							ob+="<![CDATA["
+							
+							string s = richTextFragment( richTextWithOle obj.ALongText,"", false) 
+							ob+= s
+	   
+							ob+="]]>"
+							//ob+= oleBaseFileName
+							ob+="</RTF>"  
+							
+						}
+		
+					if (isFormal && (table obj)) {
+						 htmlInlineTable(obj)
+						lastCellTable = obj
+					} else if (isFormal && (cell obj)) { 
+						Object t = cellTable(obj)
+						htmlInlineTable(t) 
+						 lastCellTable = t
+					} else { 
+						for col in m do {  
+							 if (main col) {
+								//main col 内容在longtext中
+							}else{
+										setempty tb
+										ti=attrName(col) //attrName title
+										if(ti!=null&&ti!=""){
+				 							AttrDef  adRecx = find (m, ti)
+											 if(adRecx==null){ 
+												//未找到 
+												if(ti==AnID){
+													ob+="<" title(col) ">"
+														ob+="<![CDATA["
+														ob+= obj_id
+														ob+="]]>"
+														ob+="</" title(col) ">"  
+												}
+											 }else{ 
+						 							//存在属性  读取内容  可以判断下属性类型  判断下属性 存在则显示
+													 string oleBaseFileName  = getBaseFilename(obj, "OLE", "Attribute", ti) 
+													  htmlText(tb, obj.ti, true, false,  "", "",exportDir, oleBaseFileName)  //exportDir, oleBaseFileName 这两个有用的
+													 xhtml=stringOf(tb)  
+													ob+="<" title(col) ">"
+														ob+="<![CDATA["
+														ob+= xhtml
+														ob+="]]>"
+														ob+="</" title(col) ">"  
+
+														
+													string rtftemp = richTextFragment( richTextWithOle obj.ti,"", false) 
+														ob+="<" title(col) "-RTF>"
+														ob+="<![CDATA["
+														ob+= rtftemp
+														ob+="]]>"
+														ob+="</" title(col) "-RTF>"  
+											 }	
+ 										}
+
+
+										
+										 
+							}
+				 
+									
+						}
+					}
+				 		
+		bool isPicture = (probeAttr_(obj, "Picture") == "True") 
+		 if (isPicture ){
+			 
+            bool doPicture = true 
+            string pathName = "PATH_NAME_TEST"
+            string pictName = pathName "_" probeAttr_(obj,"PictureName") "_" identifier (obj ) "_" number(obj)
+            string longPictName 
+            pictName = goodFileName (pictName ".png")
+ 
+            longPictName = exportDir pictName  
+             if (doPicture){
+                  string s = exportPicture(obj, longPictName , formatPNG_) 
+                   
+					ob += "<srcimage>"
+					ob+=pictName
+					ob+="</srcimage>" 
+             }
+			 
+        }  
+		ob += "</ROW>"  			
+	}
+ 
+if(cuview==""){
+	  
+}else{
+	 close(m) 
+}
+
+		 exportXML = "#EXPORT_XML#"
+	  	Stream outfile = write(exportDir exportXML) 
+				outfile <<  "<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n" "<root>\n"
+						  outfile <<   stringOf(ob) 
+				 outfile <<  "</root>\n"
+		close outfile   
+		 errmsg=lastError()
+ 
+
+ 

@@ -1,0 +1,247 @@
+//C# 系统结合
+
+ noError() 
+ int uniqueOleNumber = 0
+ string getBaseFilename(Object obj, string pictureType, string from, string ident)
+{ 
+    return  goodFileName(pictureType (uniqueID module fullName(module obj)) (uniqueOleNumber++) from "-" ident  "-"  )
+}  
+
+
+int index(string s, string t) {
+  int ls = length s
+  int lt = length t 
+  int i,j,k
+  for (i=0; i<(ls-lt+1) ; i++) {
+     j=i
+     for (k=0; k<lt && s[j]==t[k]; k++) {j++}
+     if (k==lt) return i
+  }
+  return -1
+}
+void replace(string& s, string t, string r) {
+  int len = length(t)
+  int i = index(s,t)
+  while(i>=0) {
+    if (i==0) s = r s[i+len:]
+    else s = s[0:i-1] r s[i+len:]
+    i = index(s,t)
+  }
+  return
+}
+
+
+
+string str = ""
+string modulePath="#MODULE_PATH#" //"/New Project/New Folder/New Module3"
+Buffer ob = create  
+Buffer tb = create  
+
+ Module m = read(modulePath,false)
+ 
+exportDir ="#EXPORT_DIR#"  
+	 
+    //获得Module中的所有一级Object
+	
+	Object cellTable(Object o) {
+
+    Object o2 = parent o
+    if (! null o2) 
+        return (parent o2)
+    else
+        return null
+}
+
+const string AHeading           = "Object Heading"
+const string ellipsis           = "..."
+const string ACellWidth         = "TableCellWidth"
+const string AnID               = "Object Identifier"
+const string AMainColumnAttribute = "Main Column Attribute"
+
+bool   usePictures        = false
+
+ 
+//****************************************************************************
+bool dumpBody(Object obj) { 
+
+    setempty tb
+    current = module obj
+    bool isOutput = false      
+    if (exists attribute ALongText)
+    { 
+		 string oleBaseFileName  = getBaseFilename(obj, "OLE", "Attribute", ALongText)
+						 setempty tb 
+						  htmlText(tb, obj.ALongText, true, false,  "", "",exportDir, oleBaseFileName) 
+		ob += tb 
+    }
+     
+    return false
+}// dumpBody
+
+
+void htmlInlineTable(Object t)  
+{
+	
+    Object r,c
+      int current_rowwidth =0 
+ ob += "<table border=1>\n"	  
+    for r in t do {
+        ncells = 0
+		
+         ob += "<tr>\n"
+        for c in r do {
+            if (!isVisible c) continue
+             if(true){
+                string wd = probeAttr_(c, ACellWidth)
+                if (null wd) wd = "150"  
+                (((((((ob += "<td colSpan=") += wd) += " valign=") += "") += "top") += "") += ">")
+            } else {
+                (((((ob += "<td valign=") += "") += "top") += "") += ">")
+            }
+            
+            ((((((ob += "<a name=") += "") += "X") += (probeAttrBuff_(c, "Absolute Number") "")) += "") += "> \n")
+            
+            if(!canRead c)
+            {
+                continue
+            }
+            string attributeName = c.(reserved AMainColumnAttribute)
+            if(null attributeName)
+            { 
+				dumpBody(c);
+            }
+            else
+            { 
+            }  
+            string absNo = probeAttr_(c, "Absolute Number")
+              
+            ob += " </td>\n"
+            
+
+        }
+        ob += "</tr>\n"
+  
+         
+    }
+
+    ob += "</table>\n"
+     
+}
+	
+Object lastCellTable        = null
+bool   isFormal           = true
+   Object obj
+	 Column col
+    for obj in   m do
+    { 		
+
+		if (isFormal && (cell obj)) {
+            Object t = cellTable(obj)
+            if (t == lastCellTable) continue
+        } 
+	 ob += "<table border=1>"
+	for col in m do {
+			
+		 ob += "<tr>" 
+		 //主列
+		if (main col) {
+                if (! canRead obj) {
+                    ob += "< Read locked data >" 
+                    continue
+                }
+                if (isFormal && (table obj)) {
+                 	 htmlInlineTable(obj)
+					lastCellTable = obj
+                } else if (isFormal && (cell obj)) {
+				 
+					
+                    Object t = cellTable(obj)
+                    htmlInlineTable(t) 
+					 lastCellTable = t
+                } else {
+                    setempty tb
+                    htmlText(tb, obj.AHeading, true, false, "", "") 
+					ob+="<td>"
+					ob+= stringOf(tb)
+					ob+="</td>" 
+
+AttrDef adRec
+adRec = find (m, ALongText)
+if(adRec==null){ 
+}else{
+   
+					
+				//	 if (exists attribute ALongText)
+				//{ 
+						 string oleBaseFileName  = getBaseFilename(obj, "OLE", "Attribute", ALongText)
+						 setempty tb 
+						  htmlText(tb, obj.ALongText, true, false,  "", "",exportDir, oleBaseFileName) 
+					  xhtml=stringOf(tb)
+					
+					 
+replace(xhtml,"src=\"OLE","src=\"../OLE"  ) 
+ 
+
+
+					
+					ob+="<td>"
+					ob+= xhtml
+					ob+="</td>" 						
+					
+				} 
+				
+				
+					
+                } 
+				
+				
+				
+            }
+			ob += "</tr >" 
+				
+    }
+				 		
+				  bool isPicture = (probeAttr_(obj, "Picture") == "True")
+			 
+ 
+ if (isPicture   ){
+ ob += "<tr >" 
+  ob += "<td >" 
+            bool doPicture = true 
+            string pathName = "PATH_NAME_TEST"
+            string pictName = pathName "_" probeAttr_(obj,"PictureName")
+            string longPictName
+           
+            pictName = goodFileName (pictName ".png")
+            longPictName = exportDir pictName 
+            if (fileExists_ longPictName){ 
+            } 
+             if (doPicture){
+                  string s = exportPicture(obj, longPictName , formatPNG_)
+                  
+                      (((ob += "<br><img src=../") += pictName) += "> ") 
+                  
+             }
+  ob += "</td >" 
+			  ob += "</tr>" 
+        } 
+		 
+//----------------------------------------------------------
+		
+	
+			 
+				
+	}
+		
+string errmsg=lastError()
+if(errmsg!=null){ 
+	 
+}else{
+		 exportXML = "#EXPORT_XML#"
+	  	Stream outfile = write(exportDir exportXML) 
+						  outfile <<   stringOf(ob) 
+		close outfile   
+		 errmsg=lastError()
+} 
+
+ 

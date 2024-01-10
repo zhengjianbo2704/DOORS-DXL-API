@@ -1,0 +1,568 @@
+ noError()  
+pragma runLim,0
+#include <utils/doctools/rtfattr.inc>
+#include <utils/doctools/itfutil.inc>
+
+ 
+Module m  
+
+//≈‰÷√
+const string level_s[]            = { "None","1","2","3","4","5","6","7","8","9","10" } 
+const string buttons[]            = { "None", "Every page" , "First page only" }
+ 
+ 
+DBE advancedBreakBefore
+DBE advancedColumnTitles
+DBE advancedIncludeBorders
+
+ 
+int iNumObjects = 0
+
+const string thinBorder        = "\\brdrs\\brdrw10"
+
+const int columnTitleNone    = 0
+const int columnTitleEvery    = 1
+const int columnTitleFirst    = 2
+
+int currentLayout       = layoutTypeBook
+int columnTitle            = columnTitleEvery
+int rtfPageBreakLevel        = 0
+bool includeBorders        = true
+
+
+const int defaultPageWidth    = 8748
+const string rowDefine  = "\\trowd \\trgaph108\\trleft-108\\trbrdrt\\brdrs\\brdrw10 \\trbrdrl\\brdrs\\brdrw10 \\trbrdrb\\brdrs\\brdrw10 \\trbrdrr\\brdrs\\brdrw10 \\trbrdrh\\brdrs\\brdrw10 \\trbrdrv\\brdrs\\brdrw10 "
+const string cellDefine = "\\clvertalt\\clbrdrt\\brdrs\\brdrw10 \\clbrdrl\\brdrs\\brdrw10 \\clbrdrb\\brdrs\\brdrw10 \\clbrdrr \\brdrs\\brdrw10 \\cltxlrtb \\cellx"
+const string rowBegin   = "\\pard \\nowidctlpar\\widctlpar\\intbl\\adjustright {"
+const string rowEnd     = "}\\pard \\nowidctlpar\\widctlpar\\intbl\\adjustright {\\row }"
+const string tableEnd   = "\\pard \\nowidctlpar\\widctlpar\\adjustright "
+
+const string paraBreak        = "\\par\\pard\\plain "
+const string defaultFontTag
+const string rtfHeader        = "{\\rtf1\\ansi\\deflang1024"
+const string cellBreak        = "\\cell\\plain"
+const string pageBreak        = "\\page"
+
+bool issueWarnings = true
+
+const int maxHeadingStyles  = 9
+const string styleSelect[maxHeadingStyles + 1]
+string defaultStyles[21]
+ 
+void constructDefaultStyleSheet() {
+// Create a default style sheet, using font 0 (Arial) for headings
+// and font 1 (Times New Roman) for text
+
+    defaultStyles[0] = "{\\widctlpar \\f1\\fs20 \\snext0 Normal;}\n"
+    styleSelect[0]   = "\\plain \\widctlpar \\f1\\fs20 "
+ 
+    defaultStyles[1] = "{\\s1\\sb240\\sa60\\keepn\\widctlpar \\b\\f0\\fs28\\kerning28 \\sbasedon0\\snext0 heading 1;}\n"
+    styleSelect[1]   = "\\s1\\sb240\\sa60\\keepn\\widctlpar \\b\\f0\\fs28\\kerning28 "
+
+    defaultStyles[2] = "{\\s2\\sb240\\sa60\\keepn\\widctlpar \\b\\i\\f0 \\sbasedon0\\snext0 heading 2;}\n"
+    styleSelect[2]   = "\\s2\\sb240\\sa60\\keepn\\widctlpar \\b\\i\\f0 "
+
+    defaultStyles[3] = "{\\s3\\sb240\\sa60\\keepn\\widctlpar \\f0 \\sbasedon0\\snext0 heading 3;}\n"
+    styleSelect[3]   = "\\s3\\sb240\\sa60\\keepn\\widctlpar \\f0 "
+
+    defaultStyles[4] = "{\\s4\\sb240\\sa60\\keepn\\widctlpar \\b\\f0 \\sbasedon0\\snext0 heading 4;}\n"
+    styleSelect[4]   = "\\s4\\sb240\\sa60\\keepn\\widctlpar \\b\\f0 "
+
+    defaultStyles[5] = "{\\s5\\sb240\\sa60\\widctlpar \\f0\\fs22 \\sbasedon0\\snext0 heading 5;}\n"
+    styleSelect[5]   = "\\s5\\sb240\\sa60\\widctlpar \\f0\\fs22 "
+
+    defaultStyles[6] = "{\\s6\\sb240\\sa60\\widctlpar \\i\\f1\\fs22 \\sbasedon0\\snext0 heading 6;}\n"
+    styleSelect[6]   = "\\s6\\sb240\\sa60\\widctlpar \\i\\f1\\fs22 "
+
+    defaultStyles[7] = "{\\s7\\sb240\\sa60\\widctlpar \\f0\\fs20 \\sbasedon0\\snext0 heading 7;}\n"
+    styleSelect[7]   = "\\s7\\sb240\\sa60\\widctlpar \\f0\\fs20 "
+
+    defaultStyles[8] = "{\\s8\\sb240\\sa60\\widctlpar \\i\\f0\\fs20 \\sbasedon0\\snext0 heading 8;}\n"
+    styleSelect[8]   = "\\s8\\sb240\\sa60\\widctlpar \\i\\f0\\fs20 "
+
+    defaultStyles[9] = "{\\s9\\sb240\\sa60\\widctlpar \\b\\i\\f0\\fs18 \\sbasedon0\\snext0 heading 9;}\n"
+    styleSelect[9]   = "\\s9\\sb240\\sa60\\widctlpar \\b\\i\\f0\\fs18 "
+
+    defaultStyles[10] = "{\\*\\cs10 \\additive Default Paragraph Font;}\n"
+    defaultStyles[17] = "{\\s17\\widctlpar \\f1\\fs20 \\sbasedon0\\snext17 footnote text;}\n"
+    defaultStyles[18] = "{\\*\\cs18 \\additive\\super \\sbasedon10 footnote reference;}\n"
+    defaultStyles[19] = "{\\s19\\widctlpar\\tqc\\tx4153\\tqr\\tx8306 \\f1\\fs20 \\sbasedon0\\snext19 header;}\n"
+    defaultStyles[20] = "{\\s20\\widctlpar\\tqc\\tx4153\\tqr\\tx8306 \\f1\\fs20 \\sbasedon0\\snext20 footer;}\n"
+}
+
+
+const string fontTable =
+"\\deff1{\\fonttbl
+{\\f0\\fswiss\\fcharset0 Arial;}
+{\\f1\\froman\\fprq2\\fcharset0 Tahoma;}
+{\\f2\\froman\\fprq2\\fcharset2 Symbol;}
+{\\f3\\fswiss\\fprq2\\fcharset128 Arial Unicode MS;}
+{\\f4\\fswiss\\fprq2\\fcharset129 Arial Unicode MS;}
+{\\f5\\fswiss\\fprq2\\fcharset130 Arial Unicode MS;}
+{\\f6\\fswiss\\fprq2\\fcharset134 Arial Unicode MS;}
+{\\f7\\fswiss\\fprq2\\fcharset136 Arial Unicode MS;}
+{\\f8\\fswiss\\fcharset161 Arial;}
+{\\f9\\fswiss\\fcharset162 Arial;}
+{\\f10\\fswiss\\fcharset163 Arial;}
+{\\f11\\fswiss\\fcharset177 Arial;}
+{\\f12\\fswiss\\fcharset178 Arial;}
+{\\f13\\fswiss\\fcharset186 Arial;}
+{\\f14\\fswiss\\fcharset204 Arial;}
+{\\f15\\fswiss\\fprq2\\fcharset222 Arial Unicode MS;}
+{\\f16\\fswiss\\fcharset238 Arial;}
+}"
+ void dumpFontTable(Stream st) {
+    st << fontTable
+}
+
+string getHeadingText(Object o, bool &isFrontMatter, bool isInputStringPartOfTable) 
+{
+    if (!hasCopyableHeading o) 
+    {
+        isFrontMatter = false
+        return ""
+    }
+    string s = richTextFragment( richTextWithOle o.AHeading, fontTable, isInputStringPartOfTable) 
+    isFrontMatter = (o.AHeading "" == cFrontMatter)
+
+    return s
+}
+
+string getBodyText(Object o, bool isInputStringPartOfTable) 
+{
+    if (!hasCopyableText o) 
+    {
+        return ""
+    }
+    if (issueWarnings && containsUnregisteredOle(o.ALongText)) {
+        warningBox "Object " (identifier o) " contains one or more unregistered OLE objects in '" ALongText "'.\n\nThese OLE objects will be exported as pictures."
+    }
+    string s = richTextFragment( richTextWithOle o.ALongText, fontTable, isInputStringPartOfTable) 
+    if (s == cEmptyCell)
+    s = ""
+    return s
+}
+ string getTableAttributes(Object o)
+{
+    if(!hasCopyableTableAttributes(o))
+    {
+        return ""
+    }
+    string attributeName = o.(reserved AMainColumnAttribute)
+    if (issueWarnings && containsUnregisteredOle(o.attributeName)) {
+        warningBox "Object " (identifier o) " contains one or more unregistered OLE objects in '" attributeName "'.\n\nThese OLE objects will be exported as pictures."
+    }
+    string s = richTextFragment( richTextWithOle o.attributeName, fontTable ) 
+    return s
+}
+void rtfDumpTable(Object t) {
+    string heading,text_string
+    bool isFrontMatter = false
+    Object r, c
+    int cellwidth = 0
+    int cells = 0
+    int noRows = 0
+
+    for r in t do 
+    {
+        noRows++
+        cells = 0
+        for c in r do 
+        {
+            if (!cell c) continue
+            if (!isVisible c) continue
+            cells++
+        }
+        if (cells == 0) noRows--
+    }
+
+    if (noRows == 0) return
+
+    cout << paraBreak
+    //cout << styleSelect[0]
+
+    for r in t do 
+    {
+        cells = 0
+        for c in r do 
+        {
+            if (!isVisible c) continue
+            cells++
+        }
+        if (cells == 0) continue
+
+        // begin row
+        int count
+        cellwidth = defaultPageWidth / cells
+        cout << "\n" rowDefine "\n"
+        for (count = 1; count <= cells; count++) 
+        {
+            cout << cellDefine
+            cout << (count * cellwidth) "\n"
+        }
+        cout << rowBegin
+
+        for c in r do {
+            if (!isVisible c) continue
+
+            // begin cell
+            //If the object cannot be read..
+            if(!canRead c)
+            {
+                cout << cellBreak " " 
+                continue
+            }
+            string attributeName = c.(reserved AMainColumnAttribute)
+            if(null attributeName)
+            {
+                heading = getHeadingText(c,isFrontMatter, true)
+                if (!null heading) {
+                    cout << heading " "
+                    cout << "\n"
+                }
+                text_string = getBodyText( c, true)
+                if ((!null heading) && (!null text_string))
+                {
+                    //The object text in a table was not getting exported.
+                    //There was a missing rowBegin which inhibited the export.
+                    //Hence the previous row begin is ended and there is a new
+                    //row begin for the object text
+                    cout << "}"
+                    cout << "\\par"
+                    cout << rowBegin
+                }
+                if (!null text_string) {
+                    cout << text_string
+                    cout << "\n"
+                }
+           }
+           else
+           {    
+                string tableAttributesValue = getTableAttributes(c)
+                if(!null tableAttributesValue)
+                {
+                    cout << tableAttributesValue
+                    cout << "\n"
+                }
+           }
+           cout << cellBreak " " 
+        }
+
+        // end row
+        cout <<  rowEnd "\n"
+    }
+    cout << tableEnd "\n"
+}
+bool goodToRead(Object o, string attribName) 
+{
+    return ((exists attribute attribName) && (canRead o.attribName))
+}
+bool dumpPicturesBody(Object o, bool forTable, bool noBreaks) 
+{
+    Buffer pict = null
+    Buffer shppict = null
+    Buffer nonshppict = null
+    bool retval = false
+
+    if (goodToRead(o,APict)) 
+    {
+        pict = create
+        setempty pict
+        pict += o.APict ""
+        if (length pict == 0) 
+        {
+            delete pict
+            shppict = null
+        }
+    }
+
+    if (goodToRead(o,AShpPict)) 
+    {
+        shppict = create
+        setempty shppict
+        shppict += o.AShpPict ""
+        if (length shppict == 0) 
+        {
+            delete shppict
+            shppict = null
+        }
+    }
+    if (goodToRead(o,ANonShpPict)) 
+    {
+        nonshppict = create
+        setempty nonshppict
+        nonshppict += o.ANonShpPict ""
+        if (length nonshppict == 0) 
+        {
+            delete nonshppict
+            nonshppict = null
+        }
+    }
+
+    if (((!null pict) || (!null shppict) || (!null nonshppict)) && (!noBreaks)) 
+    {
+        if (!forTable) 
+        {
+            cout << paraBreak
+            //cout << styleSelect[0]
+        } 
+        else 
+        {
+            cout << "\\pard\\plain\\intbl"
+        }
+    }
+
+    if (!null pict) 
+    {
+        cout << "{\\pict"
+        cout << pict
+        cout << "}\n"
+        retval = true
+    }
+
+    if (!null shppict) 
+    {
+        cout << "{\\*\\shppict{\\pict"
+        cout << shppict
+        cout << "}}\n"
+        retval = true
+    }
+
+    if (!null nonshppict) 
+    {
+        cout << "{\\nonshppict\\pict"
+        cout << nonshppict
+        cout << "}\n"
+        retval = true
+    }
+
+    if (!null pict)
+        delete pict
+    if (!null shppict)
+        delete shppict
+    if (!null nonshppict)
+        delete nonshppict
+
+    return retval
+}
+bool dumpPictures(Object o, bool hasRecordedStyle, bool forTable) 
+{ 
+    if (goodToRead(o,ARTFObj) && goodToRead(o,ARTFObjdata) && goodToRead(o,ARTFObjclass) && goodToRead(o,APict)) 
+    {
+        Buffer oledata = create
+
+        setempty oledata
+
+        oledata += o.ARTFObjdata ""
+
+        if ((length oledata == 0) || (null (o.ARTFObj "")) || (null (o.ARTFObjclass ""))) 
+        {
+            delete oledata
+            oledata = null
+        } 
+        else 
+        { 
+            if (!forTable) 
+            {
+                cout << paraBreak
+                //cout << styleSelect[0]
+            } 
+            else 
+            {
+                cout << "\\pard\\plain\\intbl"
+            }
+            cout << "{\\object "
+            cout << o.ARTFObj ""
+            cout << "{\\*\\objclass "
+            cout << o.ARTFObjclass "}"
+            cout << "{\\*\\objdata "
+            cout << oledata
+            cout << "}\n"
+            cout << "{\\result {"
+    
+            dumpPicturesBody(o,forTable,true)
+
+            cout << "}}}\n"
+
+            delete oledata
+            return true
+        }
+    }
+
+    return dumpPicturesBody(o,forTable,false)
+}
+int rtfDumpBookObject(Object o, int previouslev, bool includeNumbers) 
+{
+    int actual
+    string heading, text_string
+    bool isFrontMatter = false
+
+    heading = getHeadingText(o, isFrontMatter, false)
+    if (isFrontMatter) return 0
+    text_string = getBodyText( o, false)
+
+
+    // page breaks occur when object level decreases and passes page break level
+    actual = level o
+    if (previouslev > actual and rtfPageBreakLevel >= actual) 
+    {
+        cout << pageBreak
+    }
+    if (actual > 9) actual = 9
+
+    if (!null heading)
+    {
+        cout << paraBreak
+        //cout << styleSelect[actual]
+        if (includeNumbers) 
+        {
+            cout << (number o " ")
+        }
+        cout << heading
+        cout << "\n"
+    }
+
+    if (showPictures (module o)) 
+    {
+        if (dumpPictures(o,false,false)) return actual
+    }
+
+    if ((!null text_string) && (!hasPicture o)) 
+    {
+        cout << paraBreak
+        cout << styleSelect[0]
+        cout << text_string
+        cout << "\n"
+    }
+
+    if ((null heading) && (null text_string)) 
+    {
+        if ((!hasPicture o) && (!oleIsObject o) && includeNumbers) 
+        {
+            /* totally empty object, dump heading number as per display */
+            cout << paraBreak
+            cout << styleSelect[actual]
+            cout << (number o " ")
+        } 
+        else 
+        {
+            cout << paraBreak
+            cout << styleSelect[0]
+            cout << "\n"
+        }
+    }
+    return actual
+}
+
+
+void dumpStyleSheet(Stream st) {
+    int count
+
+    constructDefaultStyleSheet
+
+    st << "{\\stylesheet\n"
+    for (count = 0; count <= maxHeadingStyles; count++) {
+    st << defaultStyles[count]
+    }
+    st << defaultStyles[10]
+    st << defaultStyles[17]
+    st << defaultStyles[18]
+    st << defaultStyles[19]
+    st << defaultStyles[20]
+    st << "}\n"
+}
+
+
+void exportBook(  bool includeNumbers, string filex) 
+{
+    Object o
+    int previouslev = 0
+	 
+    cout = write(""filex)
+     current = m
+	 
+    if (exists attribute AHeader) 
+    {
+        cout << "{"
+        cout << probeAttr_(m, AHeader)
+    } 
+    else 
+    {
+        cout << rtfHeader
+    }
+
+
+    dumpFontTable(cout)
+    dumpStyleSheet(cout)
+
+    
+   // dumpRTFAttr(m, "{\\filetbl ",    AFileTable, true)
+   // dumpRTFAttr(m, "{\\colortbl ",   AColorTable, true)
+  //  dumpRTFAttr(m, "{\\revtbl ",     ARevTable, true)
+
+   // dumpSummaryInfo(cout, m) 
+    for o in document m do 
+    { 
+        if (table o) 
+        {
+            if (tableContents m) 
+            {
+                rtfDumpTable o
+            } 
+            else 
+            {
+               // previouslev = rtfDumpTableMarker(o,previouslev) 
+            }
+        } 
+        else 
+        {
+            if (!isDocumentIgnore o) 
+            {
+                 previouslev = rtfDumpBookObject(o,previouslev,includeNumbers)
+                 
+            }
+        }
+    }
+
+     
+    cout << "}"
+    close cout
+}
+
+void initRTFData() 
+{
+    Object o 
+    iNumObjects = 0 
+    if (null m) 
+    {
+        ack "No current module"
+        halt
+    }
+    for o in m do iNumObjects++
+}
+ 
+ 
+    
+
+bool userExportCode(string fname, int layout, bool includeHeadings, bool warnUnregOLE ) 
+{
+    
+    initRTFData 
+     exportBook(  includeHeadings, fname)
+    
+    return true
+}
+
+
+string modulePath="#MODULE_PATH#"
+  m = read(modulePath,false)
+
+ userExportCode("#EXPORT_DIR##EXPORT_RTF#",1,true,true)
+ 
+	
+string errmsg=lastError()
+if(errmsg!=null){ 
+	 
+}else{
+    
+} 

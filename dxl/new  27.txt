@@ -1,0 +1,101 @@
+bool acceessFile(string user, AccessRec acl) {
+  string thisuser = (username acl) 
+  if(thisuser==null){    
+      if (read acl) { 
+                return  true 
+          } 
+    }
+
+  if (thisuser != user) return false   
+  if (read acl) {
+    return  true 
+  } 
+  return false
+} 
+ 
+bool access(string user,string module){ 
+ 
+AccessRec macl
+ 
+//string user = "USER_A" 
+
+//Module mod=read("/New Project/New Folder/New Module3",false)
+ Module mod=read(module,false)
+ 
+bool folderfound=false 
+for macl in mod do {
+  if (acceessFile(user, macl)) {
+    folderfound = true
+    break
+  }
+}
+if(folderfound){
+
+}else{
+	   string pathName = path(mod)  
+	   Folder f = folder(pathName) 
+
+		 string itemName = fullName(f)
+		Item   thisItem = item(itemName) 
+		string errmsg = ""
+		bool   inher  = false
+		errmsg = isAccessInherited(thisItem, inher)
+		 
+		while ( errmsg == "" && inher && !null thisItem )
+		{   
+			itemName = path(thisItem)
+			thisItem = item(itemName) 
+			errmsg = isAccessInherited(thisItem, inher)  
+			
+		}
+	AccessRec facl
+	 
+	Folder pFolder = folder(itemName) 
+	for facl in pFolder do {
+	  if (acceessFile(user, facl)) {
+		folderfound = true
+		break
+	  }
+	}
+	 print "folderfound: " folderfound "\n"
+	 }
+	  return folderfound
+ }
+ 
+ 
+bool accessFolder(string user,string pathName){  
+ 
+bool folderfound=false 
+
+
+	   Folder f = folder(pathName) 
+
+		 string itemName = fullName(f)
+		Item   thisItem = item(itemName) 
+		string errmsg = ""
+		bool   inher  = false
+		errmsg = isAccessInherited(thisItem, inher)
+		 
+		while ( errmsg == "" && inher && !null thisItem )
+		{   
+			itemName = path(thisItem)
+			thisItem = item(itemName) 
+			errmsg = isAccessInherited(thisItem, inher)  
+			
+		}
+	AccessRec facl
+	 
+	Folder pFolder = folder(itemName) 
+	for facl in pFolder do {
+	  if (acceessFile(user, facl)) {
+		folderfound = true
+		break
+	  }
+	}
+	 print "folderfound: " folderfound "\n"
+	 return folderfound
+ }
+ 
+ accessFolder("USER_A","/New Project/New Folder");
+ 
+ 

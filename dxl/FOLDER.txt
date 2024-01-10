@@ -1,0 +1,67 @@
+ noError() 
+//函数2：从第一级目录开始向下遍历
+string scanFromFirstFolder(Folder f)
+{
+
+    Item itm
+	string str=""
+    for itm in f do
+    {
+
+        if (null itm) continue
+        if (isDeleted(itm)) continue
+
+        if ((type (itm) == "Project") || (type (itm) == "Folder"))
+        {   
+
+            string s = name(folder(itm))
+ 
+			  string PathName = fullName(itm) 
+			  
+            str = str "<folder name=\""s "\"  type=\""type(itm)"\" path=\""PathName "\" >\n"
+
+            scanFromFirstFolder(folder(itm))    //从一级目录开始递归遍历
+
+
+            str = str "</folder>\n"
+
+        }
+        else
+        {
+            string s = name(itm)
+			
+			string PathName = fullName(itm)
+            str = str "<module name=\""s "\"  type=\"FomalModule\" path=\""PathName "\" /> "
+         
+
+ 
+
+
+        }
+
+    }
+return str
+}
+
+string itm="/New Project/New Folder" 
+string s = name(folder(itm))
+
+string str=""
+str = str "<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n" "<root>\n"
+ 
+string listfolder=scanFromFirstFolder(folder(itm))
+str=str listfolder
+str=str "</root>" 
+string errmsg=lastError()
+if(errmsg!=null){  
+}else{ 
+		exportDir = "D:/1/" 
+		exportXML = "LISTFOLDER"
+ 
+		Stream outfile = write(exportDir exportXML ) 
+						  outfile <<   str
+		close outfile   
+		
+		errmsg=lastError()
+}
+ 

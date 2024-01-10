@@ -1,0 +1,63 @@
+   noError() 
+   
+     
+string scanFromFirstFolder(Folder f,string users[])
+{
+    Item itm
+	string str=""
+    for itm in f do
+    {
+        if (null itm) continue
+        if (isDeleted(itm)) continue
+        if ((type (itm) == "Project") || (type (itm) == "Folder"))
+        {      
+			 
+            string s = name(folder(itm))
+ 
+			  string PathName = fullName(itm) 
+			  	string desc=description(itm)
+
+            str = str "<folder name=\""s "\"  type=\""type(itm)"\" path=\""PathName "\" desc=\""desc "\" >\n" 
+			  
+			 str = str scanFromFirstFolder(folder(itm),users)    //从一级目录开始递归遍历
+			  
+            str = str "</folder>\n"
+        }
+        else if(type (itm) == "Formal") 
+        {  
+			 
+            string s = name(itm) 
+			string PathName = fullName(itm)
+			  	string desc=description(itm)
+            str = str "<module name=\""s "\"  type=\"FomalModule\" path=\""PathName "\" desc=\""desc "\" />\n " 
+        }
+    }
+	return str
+}
+
+ 
+  
+string itm="#EXPORT_FOLDER#"
+if(itm==""){
+	itm="/" //默认
+}
+ 
+string str=""
+str = str "<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n" "<root>\n"
+   string usersz[]={""}
+string listfolder=scanFromFirstFolder(folder(itm),usersz)
+str=str listfolder
+  
+str=str "</root>" 
+
+ 
+		exportDir = "#EXPORT_DIR#" 
+		exportXML = "#EXPORT_XML#"
+ 
+		Stream outfile = write(exportDir exportXML ) 
+						  outfile <<   str
+		close outfile    
+		errmsg=lastError()
+ 
+ 
+ 

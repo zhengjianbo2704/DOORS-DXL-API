@@ -1,0 +1,169 @@
+  noError() 
+
+string str = ""
+string ustr = ""
+ 
+Array arrUsername = create(100,1)
+Array arr = create(100,1)
+
+bool isExit(Array a,string s,int index)
+{ 
+    int i
+    for(i = 0;i<index;++i)
+    {
+        string element = get(a,i,0)
+        if(element == null)
+            continue
+        if(element == s)
+        {
+            return true
+            break
+        }
+
+    }
+    if(i == index)
+        return false
+
+}
+ 
+
+
+
+ 
+Project p
+string key
+string ukey
+
+int index = 0
+int uindex=0
+Skip map = create  
+Skip umap = create   
+
+void FindFirstFolder(Item i){
+	 	
+	AccessRec acl   
+		for acl in i  do {
+			 string thisuser = (username acl) 
+ 
+			if(thisuser==null){	 
+				
+			}else{  
+				put(arrUsername,thisuser,uindex,0) 
+				uindex = uindex+1	
+ 				
+				put(umap ,thisuser,thisuser)
+
+
+			}
+		} 
+
+    if(type i == "Project" || type i == "Folder")
+    {
+
+        Folder f = folder(i) 
+        string pathName = path(f)
+
+        if(isExit(arr,pathName,index))
+            return
+
+        string tempName
+        while(pathName != "/")
+        {
+            //说明f不是第一级
+            tempName = fullName(f)
+            put(arr,tempName,index,0)
+            index = index+1
+
+            f = getParentFolder(f)
+            pathName = path(f)              
+        }
+
+        key = uniqueID(f)
+        put(map,key,f)
+
+    }
+}
+
+
+for p in database do {
+
+    FindFirstFolder item(fullName p)
+}
+
+
+//函数2：从第一级目录开始向下遍历
+void scanFromFirstFolder(Folder f)
+{
+
+    Item itm
+
+    for itm in f do
+    { 
+        if (null itm) continue
+        if (isDeleted(itm)) continue
+	 
+		AccessRec acl  
+		for acl in itm do {
+			 string thisuser = (username acl) 
+ 
+ 
+			if(thisuser==null){	 
+			
+			}else{  
+				put(arrUsername,thisuser,uindex,0) 
+				uindex = uindex+1	
+				put(umap ,thisuser,thisuser)
+
+			}
+		} 
+		
+        if ((type (itm) == "Project") || (type (itm) == "Folder"))
+        {   
+
+            string s = name(folder(itm))
+ 
+			  string PathName = fullName(itm) 
+			   
+            scanFromFirstFolder(folder(itm))    //从一级目录开始递归遍历
+ 
+
+        } 
+
+    }
+}
+
+
+//调用函数2，完成所有的遍历
+ 
+Folder ans 
+for ans in map do 
+{
+    string sFolder = name(ans)
+    string typeName = type(ans)
+	string PathName = fullName(ans)
+    scanFromFirstFolder(ans) 
+}
+
+Buffer ob = create  
+
+ob+="<?xml version=\"1.0\" encoding=\"GB2312\" standalone=\"yes\" ?>\n <root>"
+
+ string uname
+ for uname in umap do 
+{
+	ob+= "<user>" 
+	ob += uname 	
+	ob+="</user>"  
+} 
+ob+="</root>"
+exportDir ="#EXPORT_DIR#"  
+//string errmsg=lastError()
+//if(errmsg!=null){ 
+// 
+//}else{
+		exportXML = "#EXPORT_XML#"
+	  	Stream outfile = write(exportDir exportXML) 
+						  outfile <<   stringOf(ob) 
+		close outfile   
+		 errmsg=lastError()
+//} 
